@@ -1,10 +1,11 @@
 import sys
 from .config import parse_args, print_config, ConfigError
 from .graph import build_dependency_graph, read_test_graph, GraphError
+from .visualizer import generate_graphviz, print_ascii_tree
 
 
 def main():
-    """Точка входа для Этапа 3."""
+    """Точка входа (Этапы 3 и 5)."""
     try:
         args = parse_args()
     except ConfigError as e:
@@ -24,9 +25,16 @@ def main():
         print(f"Ошибка графа: {e}", file=sys.stderr)
         sys.exit(1)
 
-    print("\nГраф успешно построен! Результат:")
-    for node, children in graph.items():
-        print(f"  {node} -> {children}")
+    print("\nГраф успешно построен!")
+
+    if args.ascii_tree:
+        print("\nДерево зависимостей:")
+        print_ascii_tree(graph, args.package)
+
+    dot_filename = "dependencies.dot"
+    msg = generate_graphviz(graph, dot_filename)
+    print(f"\n{msg}")
+    print("Вы можете открыть этот файл в Graphviz (или на edotor.net).")
 
 
 if __name__ == "__main__":
