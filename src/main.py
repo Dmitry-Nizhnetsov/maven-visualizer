@@ -1,10 +1,10 @@
 import sys
 from .config import parse_args, print_config, ConfigError
-from .maven import get_direct_dependencies, MavenError
+from .graph import build_dependency_graph, read_test_graph, GraphError
 
 
 def main():
-    """Точка входа для Этапа 2."""
+    """Точка входа для Этапа 3."""
     try:
         args = parse_args()
     except ConfigError as e:
@@ -13,25 +13,20 @@ def main():
 
     print_config(args)
 
-    if args.test_mode:
-        print(f"\nТестовый режим: {args.test_repo}")
-        print("Прямые зависимости будут прочитаны на Этапе 3.")
-        return
-
-    print(f"\nЗапрашиваем данные для {args.package}...")
-
     try:
-        deps = get_direct_dependencies(args.repo, args.package)
-    except MavenError as e:
-        print(f"Ошибка Maven: {e}", file=sys.stderr)
+        if args.test_mode:
+            print(f"\nЧитаем тестовый граф из {args.test_repo}...")
+            graph = read_test_graph(args.test_repo)
+        else:
+            print(f"\nСтроим граф для {args.package} (это может занять время)")
+            graph = build_dependency_graph(args.repo, args.package)
+    except GraphError as e:
+        print(f"Ошибка графа: {e}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\nПрямые зависимости ({len(deps)}):")
-    if len(deps) == 0:
-        print("  (нет зависимостей)")
-    else:
-        for dep in deps:
-            print(f"  {dep.full_name()}")
+    print("\nГраф успешно построен! Результат:")
+    for node, children in graph.items():
+        print(f"  {node} -> {children}")
 
 
 if __name__ == "__main__":

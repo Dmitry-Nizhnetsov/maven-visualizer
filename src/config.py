@@ -25,6 +25,12 @@ def create_parser():
     parser.add_argument(
         "--ascii-tree", action="store_true", help="Вывод деревом"
     )
+    parser.add_argument(
+        "--filter", default=None, help="Фильтр (подстрока)"
+    )
+    parser.add_argument(
+        "--output", default="graph.dot", help="Выходной файл Graphviz"
+    )
     return parser
 
 
